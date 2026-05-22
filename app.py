@@ -1,5 +1,5 @@
 import os
-from flask import Flask
+from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
 
@@ -24,11 +24,44 @@ class Product(db.Model):
 
 @app.route("/")
 def home():
-    count = Product.query.count()
-    return f"Grocery Shop is running! Products in database: {count}"
+    products = Product.query.all()
+    return render_template("products.html", products=products)
 
+
+@app.route("/add", methods=["GET", "POST"])
+def add_product():
+    if request.method == "POST":
+        product = Product(
+            name=request.form["name"],
+            price=float(request.form["price"]),
+            stock=int(request.form["stock"]),
+        )
+        db.session.add(product)
+        db.session.commit()
+        return redirect(url_for("home"))
+    return render_template("form.html", product=None)
+
+
+@app.route("/edit/<int:id>", methods=["GET", "POST"])
+def edit_product(id):
+    product = Product.query.get_or_404(id)
+    if request.method == "POST":
+        product.name = request.form["name"]
+        product.price = float(request.form["price"])
+        product.stock = int(request.form["stock"])
+        db.session.commit()
+        return redirect(url_for("home"))
+    return render_template("form.html", product=product)
+
+
+@app.route("/delete/<int:id>")
+def delete_product(id):
+    product = Product.query.get_or_404(id)
+    db.session.delete(product)
+    db.session.commit()
+    return redirect(url_for("home"))
 
 if __name__ == "__main__":
     with app.app_context():
-        db.create_all()  # creates tables that don't exist yet
+        db.create_all()
     app.run(debug=True, host="0.0.0.0", port=5000)
