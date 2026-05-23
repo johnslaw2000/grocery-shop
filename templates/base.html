@@ -2,10 +2,14 @@
 <html>
 <head>
     <title>Grocery Shop</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-<h1>🛒 Grocery Shop</h1>
-<hr>
-{% block content %}{% endblock %}
+    <header>
+        <h1>🛒 Grocery Shop</h1>
+    </header>
+    <main>
+        {% block content %}{% endblock %}
+    </main>
 </body>
 </html>
